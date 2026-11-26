@@ -1,18 +1,19 @@
 import express, { json } from "express";
+import connectDataBase from "./config/dbConnect.js";
+import livroModel from "./models/Livros.js";
+
+const connection = await connectDataBase();
+
+connection.on("error", (error) => {
+    console.error("Erro de conexão", error);
+});
+
+connection.once("open", () => {
+    console.log("Conexão com o banco de dados bem sucedida!");
+})
 
 const app = express();
 app.use(json());
-
-const livros = [
-    {
-        id: 1,
-        titulo: "o mistério dos 7 relógios"
-    },
-    {
-        id: 2,
-        titulo: "assassinato no expresso do oriente"
-    }
-]
 
 function findBook(id) {
     return livros.findIndex((livro) => {
@@ -24,8 +25,9 @@ app.get("/", (req, res) => {
     res.status(200).send("Curso de Node.js com express");
 })
 
-app.get("/livros", (req, res) => {
-    res.status(200).json(livros);
+app.get("/livros", async (req, res) => {
+    const listaLivros = await livroModel.find({});
+    res.status(200).json(listaLivros);
 })
 
 app.post("/livros", (req, res) => {
@@ -51,3 +53,4 @@ app.delete("/livros/:id", (req, res) => {
 })
 
 export default app;
+
